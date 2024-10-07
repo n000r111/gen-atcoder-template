@@ -31,6 +31,7 @@ func main() {
 			return
 		}
 
+		// generate main.py
 		createdFile, err := os.Create(filepath.Join(problemPath, "main.py"))
 		if err != nil {
 			fmt.Println("Error creating main.py:", err)
@@ -39,6 +40,7 @@ func main() {
 		defer createdFile.Close()
 
 		originalFilePath := filepath.Join(".", "templates", "main.py")
+		copiedFilePath := filepath.Join(problemPath, "main.py")
 
 		templateFile, err := os.Open(originalFilePath)
 		if err != nil {
@@ -57,18 +59,21 @@ func main() {
 			fmt.Println("failed to get source file information: %w", err)
 			return
 		}
-		err = os.Chmod(filepath.Join(problemPath, "main.py"), srcInfo.Mode())
+
+		err = os.Chmod(filepath.Join(copiedFilePath), srcInfo.Mode())
 		if err != nil {
 			fmt.Println("failed to set file permissions: %w", err)
 			return
 		}
 
-		if _, err := os.Create(filepath.Join(problemPath, ".tool-versions")); err != nil {
+		// generate .tool-versions
+		versionsFilePath := filepath.Join(problemPath, ".tool-versions")
+		if _, err := os.Create(versionsFilePath); err != nil {
 			fmt.Println("Error creating .tools-versions:", err)
 			return
 		}
 
-		if os.WriteFile(filepath.Join(problemPath, ".tool-versions"), []byte("python 3.12.4\n"), unixPerms); err != nil {
+		if err := os.WriteFile(versionsFilePath, []byte("python 3.12.4\n"), unixPerms); err != nil {
 			fmt.Println("Error writing to .tools-versions:", err)
 			return
 		}
@@ -78,14 +83,30 @@ func main() {
 			return
 		}
 
+		if err := os.Mkdir(filepath.Join(problemPath, "test", "in"), unixPerms); err != nil {
+			fmt.Println("Error creating directory:", dir, err)
+			return
+		}
+
+		if err := os.Mkdir(filepath.Join(problemPath, "test", "out"), unixPerms); err != nil {
+			fmt.Println("Error creating directory:", dir, err)
+			return
+		}
+
 		for i := range [3]int{} {
-			testFilePath := filepath.Join(problemPath, "test", "test"+strconv.Itoa(i+1)+".txt")
-			if _, err := os.Create(testFilePath); err != nil {
+			inputFilePath := filepath.Join(problemPath, "test", "in", "in"+strconv.Itoa(i+1)+".txt")
+			if _, err := os.Create(inputFilePath); err != nil {
 				fmt.Println("Error writing to test"+strconv.Itoa(i+1)+".txt:", err)
 				return
 			}
 
-			if err := os.WriteFile(testFilePath, []byte(strconv.Itoa(i+1)+"\n"), unixPerms); err != nil {
+			if err := os.WriteFile(inputFilePath, []byte(strconv.Itoa(i+1)+"\n"), unixPerms); err != nil {
+				fmt.Println("Error writing to test"+strconv.Itoa(i+1)+".txt:", err)
+				return
+			}
+
+			outputFilePath := filepath.Join(problemPath, "test", "out", "out"+strconv.Itoa(i+1)+".txt")
+			if _, err := os.Create(outputFilePath); err != nil {
 				fmt.Println("Error writing to test"+strconv.Itoa(i+1)+".txt:", err)
 				return
 			}
