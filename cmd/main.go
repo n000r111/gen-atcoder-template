@@ -93,6 +93,11 @@ func main() {
 			return
 		}
 
+		if err := os.Mkdir(filepath.Join(problemPath, "test", "myout"), unixPerms); err != nil {
+			fmt.Println("Error creating directory:", dir, err)
+			return
+		}
+
 		for i := range [3]int{} {
 			inputFilePath := filepath.Join(problemPath, "test", "in", "in"+strconv.Itoa(i+1)+".txt")
 			if _, err := os.Create(inputFilePath); err != nil {
@@ -107,6 +112,12 @@ func main() {
 
 			outputFilePath := filepath.Join(problemPath, "test", "out", "out"+strconv.Itoa(i+1)+".txt")
 			if _, err := os.Create(outputFilePath); err != nil {
+				fmt.Println("Error writing to test"+strconv.Itoa(i+1)+".txt:", err)
+				return
+			}
+
+			myOutputFilePath := filepath.Join(problemPath, "test", "myout", "myout"+strconv.Itoa(i+1)+".txt")
+			if _, err := os.Create(myOutputFilePath); err != nil {
 				fmt.Println("Error writing to test"+strconv.Itoa(i+1)+".txt:", err)
 				return
 			}
