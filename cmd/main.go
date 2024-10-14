@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"text/template"
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 			return
 		}
 
-		// generate main.py
+		// generate main.py file
 		createdFile, err := os.Create(filepath.Join(problemPath, "main.py"))
 		if err != nil {
 			fmt.Println("Error creating main.py:", err)
@@ -39,30 +40,16 @@ func main() {
 		}
 		defer createdFile.Close()
 
-		originalFilePath := filepath.Join(".", "templates", "main.py")
-		copiedFilePath := filepath.Join(problemPath, "main.py")
-
-		templateFile, err := os.Open(originalFilePath)
+		// copy template file to main.py
+		t, err := template.New("main.tmpl").ParseFiles(filepath.Join(".", "templates", "main.tmpl"))
 		if err != nil {
-			fmt.Println("Error opening template file:", err)
+			fmt.Println("Error parsing template file:", err)
 			return
 		}
 
-		_, err = templateFile.WriteTo(createdFile)
+		err = t.Execute(createdFile, nil)
 		if err != nil {
-			fmt.Println("Error writing to main.py:", err)
-			return
-		}
-
-		srcInfo, err := os.Stat(originalFilePath)
-		if err != nil {
-			fmt.Println("failed to get source file information: %w", err)
-			return
-		}
-
-		err = os.Chmod(filepath.Join(copiedFilePath), srcInfo.Mode())
-		if err != nil {
-			fmt.Println("failed to set file permissions: %w", err)
+			fmt.Println("Error executing template file:", err)
 			return
 		}
 
