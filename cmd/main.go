@@ -65,6 +65,7 @@ func main() {
 			return
 		}
 
+		// generate test files
 		if err := os.Mkdir(filepath.Join(problemPath, "test"), unixPerms); err != nil {
 			fmt.Println("Error creating directory:", dir, err)
 			return
